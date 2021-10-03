@@ -1,0 +1,116 @@
+######   comparasion among all the four groups(AMS1k, AMS4k,nAMS1k, nAMS4k)  ##########
+
+library(dplyr)
+library(conflicted)
+conflict_prefer("filter", "dplyr")
+conflict_prefer("select", "dplyr")
+conflict_prefer("paste", "base")
+conflict_prefer("rename", "dplyr")
+
+rawmetadata <- read.csv("../data/mrm_sample_list_v4.csv", sep =",")
+rawdata <- readxl::read_xlsx("../data/mrm_df_v3.xlsx")
+
+load("../data/PEA_comb_numeric.RData")
+
+ PEA_DEP <- data %>% tibble::rownames_to_column(var = 'symbol') %>% 
+   filter(q_value < 0.05) %>% 
+ select( c(symbol,log2FC)) %>% rename(PEA_log2FC = log2FC)
+
+library(matrixTests)
+
+
+comp2groups <- list(AMS4k_AMS1k=c("AMS1k", "AMS4k"),
+                    nAMS4k_nAMS1k=c("nAMS1k", "nAMS4k"),
+                    AMS1k_nAMS1k=c("nAMS1k", "AMS1k"),
+                    AMS4k_nAMS4k=c("nAMS4k", "AMS4k"),
+                    AMS4k_nAMS1k=c("nAMS1k", "AMS1k"),
+                    AMS1k_nAMS4k=c("nAMS1k", "AMS1k")
+)
+DEA_list <- list()
+result_comb <- rownames(raw_sym)
+for (comp_var in names(comp2groups) ) {
+  #comp_var <- names(comp2groups)[[1]]
+  comp_i <- comp2groups[[comp_var]]
+  print (comp_i)
+  ####### data prepared #######
+  load(paste("../results/",comp_i[1],"_MRM_symbol_rawdata_replaceNA.RData", sep =""))
+  test1 <- raw_sym
+  load(paste("../results/",comp_i[2],"_MRM_symbol_rawdata_replaceNA.RData", sep =""))
+  test2 <- raw_sym
+  test_raw <- test1 %>% left_join(test2, by = 'symbol') %>% 
+  
+                        tibble::column_to_rownames(var = "symbol")
+  #save(test_raw, file = paste("../results/",comp_var,"_MRM_rawdata_replaceNA.RData", sep =""))
+  # log(rawdata) for t-test
+  test_raw_log <- log2(test_raw) 
+  #save(test_raw_log, file = paste("../results/",comp_var,"_MRM_rawdata_log_replaceNA.RData", sep =""))
+
+  # number of symbol validated
+  print(nrow(test_raw))
+
+  # group info 
+  subsample_pheno <- dplyr::filter(rawmetadata, group %in% comp_i )
+  group <- cbind(subsample_pheno$group, subsample_pheno$sampleID)
+  group <- as.data.frame(group)
+  colnames(group) <- c("group", "sampleID")
+  #######test_raw for mean and logFC ########
+  cols <- split(group$sampleID, group$group)
+  
+  sel_mean<- data.frame(lapply(cols, function(i) rowMeans(test_raw[i])))
+  sel_FC <- dplyr::mutate(sel_mean, FC= sel_mean[,comp_i[2]]/sel_mean[,comp_i[1]], log2FC=log2(FC)) %>%
+     tibble::rownames_to_column(var = 'symbol')
+ # View(sel_FC)
+  
+  x1 <- as.matrix(unlist(cols[1]))[,1]
+  x2 <- as.matrix(unlist(cols[2]))[,1]
+
+  ######### test_raw_log for t.test  ########
+  temp=NULL
+  for (j in 1:nrow(test_raw_log))
+  {
+    #j=1
+    test_1=apply(test_raw_log[j,x1],2, as.numeric)
+    test_2=apply(test_raw_log[j,x2],2, as.numeric)
+   #t.test for log rawdata, check var.test and paired 
+    pair_c=length(test_1)==length(test_2)
+    var=var.test(as.matrix(test_raw_log[j,x1]),as.matrix(test_raw_log[j,x2]))$p.value>0.05
+    test_palue=t.test(test_1,test_2,paired = pair_c,var.equal =var)
+    temp=rbind(temp,c(paste(comp_var),rownames(test_raw_log)[j],test_palue$p.value,
+                        paste("t.test pair=",pair_c,";var equal=",var,sep="")))
+  }
+  temp2 <- data.frame(temp, stringsAsFactors = F)    
+  colnames(temp2) <- c("groups",'symbol','p_value','method')
+  #merge result and adjust pvalue
+  test_result <- temp2 %>% left_join(sel_FC, by = "symbol") %>% 
+      mutate(q_value = p.adjust(p_value, method = 'BH'))
+  write.csv(test_result, file = paste("../results/",comp_var,"_MRM_test_result.csv", sep =""))
+ # save(test_result, file = paste("../results/",comp_var,"_MRM_test_result.RData", sep =""))
+  # rawdata with result 
+  MRM_raw_re <- test_raw %>% tibble::rownames_to_column(var ='symbol') %>%
+    left_join(test_result, by ='symbol') %>% select(-c(groups,method,p_value,FC))
+ # save(MRM_raw_re, file = paste("../results/",comp_var,"_MRM_raw_result.RData", sep =""))
+  #log raw with result
+  MRM_log_re <- test_raw_log %>% tibble::rownames_to_column(var ='symbol') %>%
+    left_join(test_result, by ='symbol') %>% select(-c(groups,method,p_value,FC))
+ # save(MRM_log_re, file = paste("../results/",comp_var,"_MRM_lograw_result.RData", sep =""))
+  
+  result_comb <- cbind(result_comb, test_result, stringsAsFactors =F)
+  
+  dep_MRM <- test_result %>% filter(q_value < 0.05) %>% select(c(symbol,log2FC))
+  #save(dep_MRM, file = paste("../results/",comp_var,"_MRM_DEPs.RData", sep =""))
+  
+  #num of DEPs
+  print(nrow(dep_MRM))
+ 
+  #########################   match with PEA      ########################
+
+   mrm_match_PEA <- test_result %>% left_join(PEA_DEP, by = "symbol") %>%
+    mutate(sig = sign(log2FC*PEA_log2FC) ) 
+  
+  n <- mrm_match_PEA %>% group_by(sig) %>% summarise(sum(sig))
+  print(n)
+
+}
+  write.csv(result_comb, file ="../results/_MRM_allgroup_test_result_combined.csv")
+save.image("MRM_allgroup_test.RData")
+
