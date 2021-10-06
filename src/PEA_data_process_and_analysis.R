@@ -1,4 +1,4 @@
-setwd("/Users/diudiu/Desktop/Figure_v4_20210827/01_PEA_DEPs/src")
+# setwd("/Users/diudiu/Desktop/Figure_v4_20210827/01_PEA_DEPs/src")
 library(dplyr)
 
 # rawdata without CV<0.3, missing freqency < 0.25 and duplication.  If NPX < LOD and NPX> 0, replaced NPX with LOD/ sqrt；if NPX < LOD and NPX<0 ,replace NPX with LOD
@@ -55,7 +55,7 @@ PEA_comb <- PEA_test %>% left_join(traw, by = 'symbol')
 save(PEA_comb, file = "../results/PEA_rawdata_result_combine.RData")
 
 DEPs_raw2 <- dep_PEA %>% left_join(pro_raw, by = 'symbol')
-colnames(DEPs_raw2)[8:27] <- group$sample
+colnames(DEPs_raw2)[8:27] <- g$sample
 PEA_comb2 <- PEA_test %>% left_join(pro_raw, by = 'symbol')
 
 write.csv(dep_PEA, file = "../results/PEA_DEPs_results_v2.csv")
@@ -64,7 +64,7 @@ save(DEPs_raw2, file = "../results/PEA_DEPs_rawdata_result_withNA.RData")
 save(PEA_comb2, file = "../results/PEA_rawdata_result_combine_withNA.RData")
 
 
-save.image("PEA_test.RData")
+save.image("../results/PEA_test.RData")
 
 ########## Volcano plot of 887 proteins ###########
 
@@ -73,7 +73,7 @@ library(ggrepel)
 library(EnhancedVolcano)
 library(magrittr)
 library(dplyr)
-setwd("/Users/diudiu/Desktop/Figure_v4_20210827/04_olink_volc/src")
+# setwd("/Users/diudiu/Desktop/Figure_v4_20210827/04_olink_volc/src")
 
 load("../data/PEA_rawdata_result_combine.RData")
 data <- PEA_comb %>% select(-c(group, method)) %>% 
@@ -133,7 +133,7 @@ EnhancedVolcano (vol_raw,
 
 
 ggsave( "../results/PEA_volcanov.tiff", height = 16, width = 15, units = "cm", dpi = 300)
-save.image("PEA_volcano.RData")
+save.image("../results/PEA_volcano.RData")
 
 ####     Heatmap of 47 PEA-identified DEPs ############
 
@@ -141,12 +141,12 @@ library("heatmaply")
 library("RColorBrewer")
 
 group <- read.csv("../data/10_olink_group.csv", sep=",")
-load("../data/PEA_DEPs_rawdata_result_withNA.RData")
+# load("../data/PEA_DEPs_rawdata_result_withNA.RData")
 
 heat_raw <- DEPs_raw2[,c("symbol",group$sample)]
 heat_raw <- heat_raw %>% tibble::column_to_rownames(var = "symbol")
 
-dir.create("../folder")
+dir.create("../results/heatmap")
 heatmaply(heat_raw,
           file ="../results/47DEPs_heatmap.html",
           color = c("#285BBC","lightyellow","#AF0000"),
@@ -167,13 +167,13 @@ heatmaply(heat_raw,
           
 )	
 
-browseURL("../folder/heatmaply_plot.png")
+browseURL("../results/heatmap/heatmaply_plot.png")
 
 ########    PCA plot of 42 DEPs identified by PEA which with no NA value ############
 
 library(dplyr)
 
-load("../data/PEA_DEPs_rawdata_result_withNA.RData")
+# load("../data/PEA_DEPs_rawdata_result_withNA.RData")
 group <- read.csv("../data/10_olink_group.csv",sep = ",",header=T, stringsAsFactors = F, check.names = F)
 
 g <- group[,c("sample","group","LLS")]
@@ -235,8 +235,8 @@ library(dplyr)
 library(ggplot2)
 library(pathview)
 
-setwd("/Users/diudiu/Desktop/Figure_v4_20210827/03_olink_enri/src")
-load("../data/PEA_DEPs_rawdata_result_withNA.RData")
+# setwd("/Users/diudiu/Desktop/Figure_v4_20210827/03_olink_enri/src")
+# load("../data/PEA_DEPs_rawdata_result_withNA.RData")
 
 symbol <-  DEPs_raw2[c("symbol")]
 
@@ -311,6 +311,7 @@ for (go_var in names(slist)){
     print(ekk_id)
     
     ekk_id <- pathview(gene.data  = FCgenelist,
+                       kegg.dir = "../results/pathview/",
                        pathway.id =  ekk_id,
                        species    = "hsa",
                        limit      = list(gene=max(abs(FCgenelist)), cpd=1)) ## cpd, compound
