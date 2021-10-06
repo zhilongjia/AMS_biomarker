@@ -11,6 +11,8 @@ colnames(pro_raw2) <- g$sample
 t_raw <- t(pro_raw2)
 t_raw <- data.frame(t_raw, stringsAsFactors = F)
 
+# t_raw_df <- as.data.frame(t_raw)
+
 #repalce QC unqualified symbol with min value multiply by 0.1
 
 raw <- data.frame(apply(t_raw,2,function(x){
@@ -19,18 +21,18 @@ raw <- data.frame(apply(t_raw,2,function(x){
 }),stringsAsFactors = F  ) 
 
 temp=NULL
-  for (j in 1:ncol(raw))
-  {
-   # j=1
+for (j in 1:ncol(raw))
+{
+    # j=1
     test_1=raw[1:10,j]
     test_2=raw[11:20,j]
-      var=var.test(test_1,test_2)$p.value>0.05
-      test_palue=t.test(test_1,test_2,paired = T,var.equal =var)
-      test_FC= mean(test_2)-mean(test_1)
-      log2FC = sprintf("%.4f", test_FC)
-      temp=rbind(temp,c(paste("PEA_AMS4k_AMS1k"),colnames(raw)[j],test_palue$p.value,
-                        paste("t_test; var equal=",var,sep=""), log2FC))
-  }
+    var <- (var.test(test_1,test_2)$p.value > 0.05)
+    test_palue=t.test(test_1,test_2,paired = T,var.equal =var)
+    test_FC= mean(test_2)-mean(test_1)
+    log2FC = sprintf("%.4f", test_FC)
+    temp=rbind(temp,c(paste("PEA_AMS4k_AMS1k"),colnames(raw)[j],test_palue$p.value,
+                      paste("t_test; var equal=",var,sep=""), log2FC))
+}
 
 temp2 <- data.frame(temp, stringsAsFactors = F)    
 colnames(temp2) <- c("group",'symbol','p_value','method','log2FC')
@@ -75,7 +77,7 @@ library(magrittr)
 library(dplyr)
 # setwd("/Users/diudiu/Desktop/Figure_v4_20210827/04_olink_volc/src")
 
-load("../data/PEA_rawdata_result_combine.RData")
+# load("../data/PEA_rawdata_result_combine.RData")
 data <- PEA_comb %>% select(-c(group, method)) %>% 
   tibble::column_to_rownames( var ='symbol')
 
