@@ -7,5 +7,7 @@ In this paper, we systematically characterized acute mountain sickness using the
 
 ## 2.Pipline
 
+
 ## 3.Dataset
-The dataset used in this 
+
+The raw MRM proteomic data analyzed in this study are available at iProX89 with the corresponding dataset identifier PXD029063 (https://www.iprox.cn/page/PSV023.html;?url=1643081969878VyeL, temporary password: 3gUW). 
