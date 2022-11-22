@@ -1,13 +1,18 @@
-# AMS_v2
-# Proteomic and clinical biomarkers of acute mountain sickness diagnosis, prognosis, protection, and pathogenesis in a longitudinal cohort
-## 1. Introduction
+# Proteomic and clinical biomarkers for acute mountain sickness in a longitudinal cohort
+
+## Abstract
 This repository contains source code for paper “Proteomic and clinical biomarkers of acute mountain sickness diagnosis, prognosis, protection, and pathogenesis in a longitudinal cohort”
 
-In this paper, we systematically characterized acute mountain sickness using the plasma proteome and clinical indexes. The proteomic analysis was performde by Olink's PEA techonology and MRM techonology. Ten-paired palsma sample were measured using PEA and performed volcano, PCA, GO & KEGG enrichment and heatmap analysis. Based on the DEPs(q-value < 0.05) identified by PEA and KEGG enrichment, we further validated in an expanded number of proteins, sample size and groups. DIfferential abundace analysis and XGBoost prediction were performed on the MRM identified proteins and clinical indexes between AMS1k and nAMS1k, AMS4k and nAMS4k, AMS4k and AMS1k, nAMS4k and nAMS1k. Finally, correlation analysis was performed to analyze the relationship between AMS phenotypes, proteins and clinical indexes.
+Ascending to high-altitude by non-high-altitude natives is a well-suited model for studying acclimatization to extreme environments. Acute mountain sickness (AMS) is frequently experienced by visitors. The diagnosis of AMS mainly depends on a self-questionnaire, revealing the need for reliable biomarkers for AMS. Here, we profiled 22 AMS symptom phenotypes, 65 clinical indexes, and plasma proteomic profiles of AMS via a combination of proximity extension assay and multiple reaction monitoring of a longitudinal cohort of 53 individuals. We quantified 1069 proteins and validated 102 proteins. Via differential analysis, machine learning, and functional association analyses. We found and validated that RET played an important role in the pathogenesis of AMS. With high-accuracies (AUCs > 0.9) of XGBoost-based models, we prioritized ADAM15, PHGDH, and TRAF2 as protective, predictive, and diagnostic biomarkers, respectively. Our findings shed light on the precision medicine for AMS and the understanding of acclimatization to high-altitude environments.
 
-## 2.Pipline
+## Abstract Figure
+
+![img](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs42003-022-03514-6/MediaObjects/42003_2022_3514_Fig1_HTML.png)
+
+## Dataset
+
+The raw MRM proteomic data analyzed in this study are available at iProX89 with the corresponding dataset identifier PXD029063 . 
 
 
-## 3.Dataset
-
-The raw MRM proteomic data analyzed in this study are available at iProX89 with the corresponding dataset identifier PXD029063 (https://www.iprox.cn/page/PSV023.html;?url=1643081969878VyeL, temporary password: 3gUW). 
+## Citation:
+[Yang, J., Jia, Z., Song, X. et al. Proteomic and clinical biomarkers for acute mountain sickness in a longitudinal cohort. Commun Biol 5, 548 (2022). https://doi.org/10.1038/s42003-022-03514-6](https://www.nature.com/articles/s42003-022-03514-6)
